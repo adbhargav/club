@@ -44,7 +44,7 @@ export default function Signup() {
       } else {
         setError(data.message || "Something went wrong");
       }
-    } catch (err) {
+    } catch {
       setError("Server error. Try again later.");
     }
   };
