@@ -8,7 +8,7 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/auth/signin", { email, password });
+      await axios.post("/auth/signin", { email, password });
       alert("Signed in successfully!");
     } catch (err) {
       alert(err.response?.data?.message || "Error signing in");
