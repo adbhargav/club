@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import api from "../../api/api"; // assuming you have axios instance with baseURL
 
 export default function Stats() {
   const [stats, setStats] = useState({
@@ -8,17 +9,11 @@ export default function Stats() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Fetch stats dynamically (from backend)
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/stats"); // Example endpoint
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-        } else {
-          console.error("Failed to fetch stats");
-        }
+        const res = await api.get("/stats");
+        setStats(res.data);
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
@@ -44,19 +39,16 @@ export default function Stats() {
       </h2>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {/* Assignments */}
         <div className="bg-gray-800 p-6 rounded-xl text-center hover:scale-105 transition-transform duration-300">
           <h3 className="text-xl font-bold text-blue-400">Assignments Completed</h3>
           <p className="text-4xl mt-2 font-semibold">{stats.assignments}</p>
         </div>
 
-        {/* Projects */}
         <div className="bg-gray-800 p-6 rounded-xl text-center hover:scale-105 transition-transform duration-300">
           <h3 className="text-xl font-bold text-blue-400">Projects Submitted</h3>
           <p className="text-4xl mt-2 font-semibold">{stats.projects}</p>
         </div>
 
-        {/* Events */}
         <div className="bg-gray-800 p-6 rounded-xl text-center hover:scale-105 transition-transform duration-300">
           <h3 className="text-xl font-bold text-blue-400">Events Attended</h3>
           <p className="text-4xl mt-2 font-semibold">{stats.events}</p>

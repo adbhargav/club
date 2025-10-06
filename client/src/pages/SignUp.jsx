@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -7,17 +8,34 @@ export default function Signup() {
     name: "",
     email: "",
     branch: "",
+    year: "",
     registerNumber: "",
     password: "",
     confirmPassword: "",
   });
 
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   // Handle input
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Handle image upload
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Handle submit
@@ -30,22 +48,27 @@ export default function Signup() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess("Account created successfully!");
-        setError("");
-        setTimeout(() => navigate("/login"), 2000);
-      } else {
-        setError(data.message || "Something went wrong");
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("email", formData.email);
+      data.append("branch", formData.branch);
+      data.append("year", formData.year);
+      data.append("registerNumber", formData.registerNumber);
+      data.append("password", formData.password);
+      if (profileImage) {
+        data.append("profileImage", profileImage);
       }
+
+      const res = await api.post("/auth/signup", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setSuccess("Account created successfully!");
+      setError("");
+      setTimeout(() => navigate("/signin"), 2000);
     } catch (err) {
-      setError("Server error. Try again later.");
+      setError(err.response?.data?.message || "Server error. Try again later.");
     }
   };
 
@@ -60,6 +83,33 @@ export default function Signup() {
         {success && <p className="text-green-400 mb-4">{success}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Profile Image Upload */}
+          <div className="flex flex-col items-center mb-4">
+            <label className="text-gray-400 mb-2 text-sm">Profile Picture (Optional)</label>
+            <div className="flex items-center gap-4">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-24 h-24 rounded-full object-cover border-2 border-blue-400"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center">
+                  <span className="text-gray-500 text-xs">No Image</span>
+                </div>
+              )}
+              <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg text-sm font-semibold transition">
+                Choose Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
           <input
             type="text"
             name="name"
@@ -89,6 +139,20 @@ export default function Signup() {
             required
             className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white"
           />
+
+          <select
+            name="year"
+            value={formData.year}
+            onChange={handleChange}
+            required
+            className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white"
+          >
+            <option value="">Select Year</option>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+            <option value="4th Year">4th Year</option>
+          </select>
 
           <input
             type="text"
@@ -131,10 +195,10 @@ export default function Signup() {
         <p className="text-gray-400 text-center mt-4">
           Already have an account?{" "}
           <span
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/signin")}
             className="text-blue-400 cursor-pointer hover:underline"
           >
-            Login
+            Sign In
           </span>
         </p>
       </div>

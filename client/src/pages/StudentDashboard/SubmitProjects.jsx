@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../../api/api";
 
 export default function Projects() {
   const [githubLink, setGithubLink] = useState("");
@@ -6,16 +7,19 @@ export default function Projects() {
   const [description, setDescription] = useState("");
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Fetch existing projects
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/projects");
-        const data = await res.json();
-        setProjects(data);
+        const res = await api.get("/projects/my-projects");
+        setProjects(res.data);
+        setError("");
       } catch (error) {
         console.error("Error fetching projects:", error);
+        setError("Failed to load projects. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -26,34 +30,45 @@ export default function Projects() {
   // Submit project
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!githubLink.trim() || !title.trim()) return;
+    if (!githubLink.trim() || !title.trim()) {
+      setError("Please fill in all required fields.");
+      return;
+    }
 
     const newProject = { title, githubLink, description };
+    setError("");
+    setSuccess("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newProject),
-      });
-
-      if (res.ok) {
-        const saved = await res.json();
-        setProjects([...projects, saved]);
-        setGithubLink("");
-        setTitle("");
-        setDescription("");
-      } else {
-        console.error("Failed to submit project");
-      }
+      const res = await api.post("/projects", newProject);
+      setProjects([...projects, res.data]);
+      setGithubLink("");
+      setTitle("");
+      setDescription("");
+      setSuccess("Project submitted successfully!");
     } catch (error) {
       console.error("Error submitting project:", error);
+      setError(error.response?.data?.message || "Failed to submit project. Please try again.");
     }
   };
 
   return (
     <div className="bg-gray-900 p-6 rounded-2xl shadow-lg">
       <h2 className="text-2xl font-semibold mb-6 text-blue-300">Submit Your Project</h2>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-900 border border-red-700 text-red-300 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {/* Success Message */}
+      {success && (
+        <div className="mb-4 p-3 bg-green-900 border border-green-700 text-green-300 rounded-lg">
+          {success}
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4 mb-8">

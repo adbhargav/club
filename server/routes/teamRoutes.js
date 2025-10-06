@@ -1,7 +1,7 @@
 import express from "express";
 import TeamMember from "../models/TeamMember.js";
 import multer from "multer";
-import cloudinary from "../config/cloudinary.js";
+import fs from "fs";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -13,8 +13,14 @@ router.post("/", protect, admin, upload.single("profileImage"), async (req, res)
   try {
     let profileImageURL = "";
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path);
-      profileImageURL = result.secure_url;
+      // Convert image to Base64 and store in MongoDB
+      const imageBuffer = fs.readFileSync(req.file.path);
+      const base64Image = imageBuffer.toString('base64');
+      const mimeType = req.file.mimetype;
+      profileImageURL = `data:${mimeType};base64,${base64Image}`;
+      
+      // Delete the temporary file
+      fs.unlinkSync(req.file.path);
     }
 
     const member = await TeamMember.create({ name, role, branch, year, contact, profileImageURL });
@@ -43,8 +49,14 @@ router.put("/:id", protect, admin, upload.single("profileImage"), async (req, re
     const { name, role, branch, year, contact } = req.body;
 
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path);
-      member.profileImageURL = result.secure_url;
+      // Convert image to Base64 and store in MongoDB
+      const imageBuffer = fs.readFileSync(req.file.path);
+      const base64Image = imageBuffer.toString('base64');
+      const mimeType = req.file.mimetype;
+      member.profileImageURL = `data:${mimeType};base64,${base64Image}`;
+      
+      // Delete the temporary file
+      fs.unlinkSync(req.file.path);
     }
 
     member.name = name || member.name;
@@ -66,8 +78,8 @@ router.delete("/:id", protect, admin, async (req, res) => {
     const member = await TeamMember.findById(req.params.id);
     if (!member) return res.status(404).json({ message: "Member not found" });
 
-    await member.remove();
-    res.json({ message: "Team member removed" });
+    await TeamMember.findByIdAndDelete(req.params.id);
+    res.json({ message: "Team member deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

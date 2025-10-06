@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import api from "../../api/api";
 
 export default function Notices() {
   const [notices, setNotices] = useState([]);
@@ -7,9 +8,8 @@ export default function Notices() {
   useEffect(() => {
     const fetchNotices = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/notices");
-        const data = await res.json();
-        setNotices(data);
+        const res = await api.get("/notices");
+        setNotices(res.data);
       } catch (error) {
         console.error("Error fetching notices:", error);
       } finally {

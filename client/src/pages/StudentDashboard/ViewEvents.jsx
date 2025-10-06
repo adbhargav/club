@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import api from "../../api/api";
 
 export default function Events() {
   const [events, setEvents] = useState([]);
@@ -7,9 +8,8 @@ export default function Events() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/events");
-        const data = await res.json();
-        setEvents(data);
+        const res = await api.get("/events");
+        setEvents(res.data);
       } catch (error) {
         console.error("Error fetching events:", error);
       } finally {

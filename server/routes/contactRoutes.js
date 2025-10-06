@@ -1,6 +1,7 @@
 // routes/contactRoutes.js
 import express from "express";
 import Contact from "../models/contact.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -21,6 +22,19 @@ router.post("/", async (req, res) => {
     res.status(201).json({ message: "Message received successfully!" });
   } catch (error) {
     console.error("Error saving contact:", error);
+    res.status(500).json({ error: "Server error, please try again later" });
+  }
+});
+
+// @route   GET /api/contact
+// @desc    Get all contact messages
+// @access  Admin only
+router.get("/", protect, admin, async (req, res) => {
+  try {
+    const contacts = await Contact.find().sort({ createdAt: -1 });
+    res.json(contacts);
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
     res.status(500).json({ error: "Server error, please try again later" });
   }
 });

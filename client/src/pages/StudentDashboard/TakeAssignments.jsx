@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import api from "../../api/api";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
@@ -7,9 +8,8 @@ export default function Assignments() {
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/assignments");
-        const data = await res.json();
-        setAssignments(data);
+        const res = await api.get("/assignments");
+        setAssignments(res.data);
       } catch (err) {
         console.error("Error fetching assignments:", err);
       } finally {

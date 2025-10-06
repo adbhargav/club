@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "../api/api";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -13,33 +14,22 @@ export default function Contact() {
     setStatus("Sending...");
 
     try {
-      const res = await fetch("http://localhost:5000/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setStatus("✅ Message sent successfully!");
-        setForm({ name: "", email: "", message: "" }); // clear form
-      } else {
-        setStatus(`❌ ${data.error || "Something went wrong."}`);
-      }
+      const res = await api.post("/contact", form);
+      setStatus("✅ Message sent successfully!");
+      setForm({ name: "", email: "", message: "" });
     } catch (error) {
       console.error("Error:", error);
-      setStatus("❌ Server error. Please try again later.");
+      setStatus(`❌ ${error.response?.data?.message || "Server error. Please try again later."}`);
     }
   };
 
   return (
-    <div className="bg-black text-white pt-24 px-6 min-h-screen flex justify-center items-center">
+    <div className="bg-gradient-to-tr from-indigo-900 via-purple-900 to-blue-950 text-white pt-24 px-4 min-h-screen flex justify-center items-center font-sans">
       <form
         onSubmit={handleSubmit}
-        className="bg-gray-900 p-8 rounded-2xl shadow-lg w-full max-w-lg space-y-5"
+        className="bg-white/10 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full max-w-lg space-y-7 border border-white/10"
       >
-        <h2 className="text-3xl font-bold mb-6 text-center text-cyan-400">
+        <h2 className="text-4xl font-extrabold mb-6 text-center text-cyan-300 drop-shadow">
           Contact Us
         </h2>
 
@@ -50,7 +40,7 @@ export default function Contact() {
           value={form.name}
           onChange={handleChange}
           required
-          className="w-full p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none"
+          className="w-full p-4 rounded-xl bg-gray-900 text-white border border-indigo-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none transition-all duration-200 placeholder:text-indigo-300"
         />
 
         <input
@@ -60,7 +50,7 @@ export default function Contact() {
           value={form.email}
           onChange={handleChange}
           required
-          className="w-full p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none"
+          className="w-full p-4 rounded-xl bg-gray-900 text-white border border-indigo-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none transition-all duration-200 placeholder:text-indigo-300"
         />
 
         <textarea
@@ -70,19 +60,19 @@ export default function Contact() {
           value={form.message}
           onChange={handleChange}
           required
-          className="w-full p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none"
+          className="w-full p-4 rounded-xl bg-gray-900 text-white border border-indigo-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none transition-all duration-200 placeholder:text-indigo-300"
         ></textarea>
 
         <button
           type="submit"
-          className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-3 rounded-xl w-full font-semibold shadow-lg transition disabled:opacity-50"
+          className="bg-cyan-400 hover:bg-cyan-500 text-indigo-900 font-bold px-6 py-4 rounded-xl w-full shadow-xl transition disabled:opacity-50"
           disabled={status === "Sending..."}
         >
           {status === "Sending..." ? "Sending..." : "Send Message"}
         </button>
 
         {status && (
-          <p className="text-center text-sm text-cyan-300 mt-3">{status}</p>
+          <p className="text-center text-base text-cyan-300 mt-3">{status}</p>
         )}
       </form>
     </div>

@@ -19,33 +19,41 @@ export default function Gallery() {
   }, []);
 
   return (
-    <div className="bg-black text-white min-h-screen px-6 py-12">
-      {/* Hero */}
-      <section className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-blue-400">
-          Gallery
-        </h1>
-        <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-          Explore the memorable moments from our AI Club events, workshops, and hackathons.
-        </p>
+    <div className="bg-gradient-to-tr from-indigo-900 via-purple-900 to-blue-950 text-white min-h-screen px-4 py-16 font-sans">
+      {/* Hero Section */}
+      <section className="text-center mb-16">
+        <div className="inline-block bg-white/10 backdrop-blur-lg rounded-2xl px-8 py-8 shadow-xl">
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-6 text-blue-400 drop-shadow">
+            Gallery
+          </h1>
+          <p className="text-xl max-w-2xl mx-auto text-indigo-100 leading-relaxed font-medium">
+            Explore the memorable moments from our AI Club events, workshops, and hackathons.
+          </p>
+        </div>
       </section>
 
       {/* Image Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <section className="grid grid-cols-2 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
         {images.map((item, idx) => (
           <div
-            key={idx}
-            className="cursor-pointer transform hover:scale-105 transition duration-300"
+            key={item._id || idx}
+            className="group cursor-pointer transform hover:scale-[1.04] transition-all duration-300 rounded-3xl overflow-hidden relative"
             onClick={() => setSelectedImage(item.imageURL)}
           >
-            <img
-              src={item.imageURL}
-              alt={item.title || `Gallery Image ${idx + 1}`}
-              className="rounded-2xl shadow-lg w-full h-60 object-cover"
-            />
+            {/* Use aspect-square for perfect fit */}
+            <div className="relative aspect-square w-full">
+              <img
+                src={item.imageURL}
+                alt={item.title || `Gallery Image ${idx + 1}`}
+                className="absolute inset-0 w-full h-full object-cover rounded-3xl shadow-2xl border-2 border-indigo-800 group-hover:border-blue-400"
+              />
+            </div>
             {item.title && (
-              <p className="text-center mt-2 text-gray-300 text-sm">{item.title}</p>
+              <p className="text-center mt-3 text-indigo-100 text-base font-semibold">
+                {item.title}
+              </p>
             )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-30 transition-all duration-300 rounded-3xl"></div>
           </div>
         ))}
       </section>
@@ -53,13 +61,13 @@ export default function Gallery() {
       {/* Modal Preview */}
       {selectedImage && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedImage(null)}
         >
           <img
             src={selectedImage}
             alt="Preview"
-            className="max-w-3xl max-h-[80vh] rounded-xl shadow-2xl"
+            className="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border-4 border-blue-400 object-contain"
           />
         </div>
       )}

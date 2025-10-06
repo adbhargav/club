@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 
-const gallerySchema = new mongoose.Schema({
-  title: { type: String },
-  imageURL: { type: String, required: true },
-  description: { type: String },
-  uploadedAt: { type: Date, default: Date.now },
-}, { timestamps: true });
+const gallerySchema = mongoose.Schema(
+  {
+    title: { type: String },
+    description: { type: String },
+    imageURL: { type: String, required: true }, // can be a base64 string or a local path
+    type: { type: String, default: "image" },
+  },
+  { timestamps: true }
+);
 
 export default mongoose.model("Gallery", gallerySchema);
